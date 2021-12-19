@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ta_caro/modules/login/login_controller.dart';
+import 'package:ta_caro/modules/login/repositories/login_repository_impl.dart';
+import 'package:ta_caro/shared/services/app_database.dart';
 import 'package:ta_caro/shared/theme/app_theme.dart';
 import 'package:ta_caro/shared/widgets/button/button.dart';
 import 'package:ta_caro/shared/widgets/input_text/input_text.dart';
@@ -13,22 +15,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final controller = LoginController();
+  late final LoginController controller;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
+    controller = LoginController(
+      repository: LoginRepositoryImpl(database: AppDatabase.instance),
+    );
     controller.addListener(() {
       controller.state.when(
-          success: (value) => Navigator.pushNamed(context, '/home'),
-          error: (message, _) => scaffoldKey.currentState!
-              .showBottomSheet((context) => BottomSheet(
-                    onClosing: () {},
-                    builder: (context) => Container(
-                      child: Text(message),
-                    ),
-                  )),
-          loading: () => print("loading..."),
+          success: (value) =>
+              Navigator.pushNamed(context, "/home", arguments: value),
+          error: (message, _) => scaffoldKey.currentState!.showBottomSheet(
+              (context) => BottomSheet(
+                  onClosing: () {}, builder: (context) => Text(message))),
           orElse: () {});
     });
     super.initState();
