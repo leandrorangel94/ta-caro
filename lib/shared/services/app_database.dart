@@ -5,6 +5,10 @@ abstract class AppDatabase {
   static final AppDatabase instance = SupabaseDatabase();
 
   void init();
+  Future<List<Map<String, dynamic>>> getAll(String table);
+
+  Future<bool> create(
+      {required String table, required Map<String, dynamic> data});
 
   Future<UserModel> createUser(UserModel user);
 

@@ -1,96 +1,186 @@
 import 'package:flutter/material.dart';
-import 'package:ta_caro/modules/login/login_controller.dart';
 import 'package:ta_caro/modules/login/repositories/login_repository_impl.dart';
 import 'package:ta_caro/shared/services/app_database.dart';
 import 'package:ta_caro/shared/theme/app_theme.dart';
-import 'package:ta_caro/shared/widgets/button/button.dart';
-import 'package:ta_caro/shared/widgets/input_text/input_text.dart';
-import 'package:validators/validators.dart';
+import 'package:ta_caro/shared/widgets/button_widget/button_widget.dart';
+import 'package:ta_caro/shared/widgets/input_email/input_email.dart';
+import 'package:ta_caro/shared/widgets/input_password/input_password.dart';
+import 'package:validatorless/validatorless.dart';
+
+import 'login_controller.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  late final LoginController controller;
-  final scaffoldKey = GlobalKey<ScaffoldState>();
+final scaffoldKey = GlobalKey<ScaffoldState>();
+late final LoginController controler;
 
+class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
-    controller = LoginController(
-      repository: LoginRepositoryImpl(database: AppDatabase.instance),
-    );
-    controller.addListener(() {
-      controller.state.when(
-          success: (value) =>
-              Navigator.pushNamed(context, "/home", arguments: value),
-          error: (message, _) => scaffoldKey.currentState!.showBottomSheet(
-              (context) => BottomSheet(
-                  onClosing: () {}, builder: (context) => Text(message))),
-          orElse: () {});
+    controler = LoginController(LoginRepositoryImpl(AppDatabase.instance));
+    controler.addListener(() {
+      controler.state.when(
+        success: (value) =>
+            Navigator.pushNamed(context, '/home', arguments: value),
+        error: (message, _) =>
+            scaffoldKey.currentState!.showBottomSheet((context) => BottomSheet(
+                onClosing: () {},
+                builder: (context) => Text(
+                      message,
+                      style: AppTheme.textStyles.hint,
+                    ))),
+        orElse: () {},
+      );
     });
     super.initState();
   }
 
   @override
+  void dispose() {
+    controler.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      backgroundColor: AppTheme.colors.background,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Form(
-          key: controller.formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset("assets/images/logo.png", width: 200),
-              InputText(
-                label: 'E-mail',
-                hint: 'Digite seu e-mail',
-                validator: (value) =>
-                    isEmail(value) ? null : "Digite um e-mail válido!",
-                onChanged: (value) => controller.onChange(email: value),
-              ),
-              SizedBox(height: 18),
-              InputText(
-                label: 'Senha',
-                obscure: true,
-                onChanged: (value) => controller.onChange(password: value),
-                hint: 'Digite sua senha',
-                validator: (value) =>
-                    value.length > 5 ? null : "Digite uma senha mais forte!",
-              ),
-              SizedBox(height: 14),
-              AnimatedBuilder(
-                animation: controller,
-                builder: (_, __) => controller.state.when(
-                  loading: () => CircularProgressIndicator(),
-                  orElse: () => Column(children: [
-                    Button(
-                      onPressed: () {
-                        return controller.login();
-                      },
-                      label: 'Entrar',
-                      type: ButtonType.fill,
+    return WillPopScope(
+        onWillPop: onWillPop,
+        child: Scaffold(
+          key: scaffoldKey,
+          backgroundColor: AppTheme.colors.background,
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: 35, bottom: 159, left: 26, right: 29),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.cover,
+                      width: 200,
                     ),
-                    SizedBox(height: 50),
-                    Button(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/login/create-account'),
-                      label: 'Criar conta',
-                      type: ButtonType.outline,
+                    SizedBox(
+                      height: 41,
                     ),
-                  ]),
+                    Form(
+                        key: controler.formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Text('E-mail').label,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            InputEmail(
+                              onChanged: (value) {
+                                controler.onChange(email: value);
+                              },
+                              validator: Validatorless.multiple([
+                                Validatorless.required('Campo obrigatório!'),
+                                Validatorless.email('email inválido!')
+                              ]),
+                              hint: 'Digite seu Email',
+                            ),
+                            SizedBox(
+                              height: 17,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Text('Senha').label,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            InputPassword(
+                              onChanged: (value) {
+                                controler.onChange(password: value);
+                              },
+                              validator: Validatorless.multiple([
+                                Validatorless.multiple([
+                                  Validatorless.required('Campo obrigatório'),
+                                  Validatorless.min(
+                                      6, 'Minimo de 6 caracteres!'),
+                                ])
+                              ]),
+                              hintText: 'Insira sua senha',
+                            )
+                          ],
+                        )),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    AnimatedBuilder(
+                        animation: controler,
+                        builder: (_, __) => controler.state.when(
+                            loading: () => CircularProgressIndicator(),
+                            orElse: () => Flexible(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      ButtonWidget(
+                                        primary: AppTheme.colors.primary,
+                                        style: AppTheme
+                                            .textStyles.buttonBackgroundColor,
+                                        text: 'Entrar',
+                                        onpressed: () {
+                                          controler.login();
+                                        },
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 19),
+                                        child: ButtonWidget(
+                                          text: 'Criar uma conta',
+                                          onpressed: () {
+                                            Navigator.pushNamed(
+                                                context, '/signup');
+                                          },
+                                          primary: AppTheme.colors.background,
+                                          style: AppTheme
+                                              .textStyles.buttonBoldTextColor,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ))),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
+  }
+
+  Future<bool> onWillPop() async {
+    final pop = await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Tem certeza'),
+              content: Text('Quer sair do app?'),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text('não')),
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: Text('Sim')),
+              ],
+            ));
+    return pop ?? false;
   }
 }

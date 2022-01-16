@@ -12,36 +12,39 @@ class AppBottomNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 76,
-      decoration: BoxDecoration(
-          color: AppTheme.colors.textEnabled,
-          borderRadius: BorderRadius.circular(12)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          IconBottomNavigator(
-            icon: Icons.home,
-            enabled: currentIndex == 0,
-            onTap: () {
-              onChanged(0);
-            },
-          ),
-          IconBottomNavigator(
-            icon: Icons.add,
-            enabled: currentIndex == 1,
-            onTap: () {
-              onChanged(1);
-            },
-          ),
-          IconBottomNavigator(
-            icon: Icons.settings,
-            enabled: currentIndex == 2,
-            onTap: () {
-              onChanged(2);
-            },
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.only(right: 26, left: 26, bottom: 14),
+      child: Container(
+        height: 76,
+        decoration: BoxDecoration(
+            color: AppTheme.colors.textEnabled,
+            borderRadius: BorderRadius.circular(12)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconBottomNavigator(
+              icon: Icons.home,
+              onTap: () {
+                onChanged(0);
+              },
+              enabled: currentIndex == 0,
+            ),
+            IconBottomNavigator(
+              icon: Icons.add,
+              onTap: () {
+                onChanged(3);
+              },
+              enabled: false,
+            ),
+            IconBottomNavigator(
+              icon: Icons.settings,
+              onTap: () {
+                onChanged(1);
+              },
+              enabled: currentIndex == 1,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -64,6 +67,8 @@ class IconBottomNavigator extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
+        width: 40,
+        height: 40,
         child: Icon(
           icon,
           color: enabled
@@ -74,8 +79,6 @@ class IconBottomNavigator extends StatelessWidget {
             color:
                 enabled ? AppTheme.colors.primary : AppTheme.colors.background,
             borderRadius: BorderRadius.circular(12)),
-        width: 40,
-        height: 40,
       ),
     );
   }

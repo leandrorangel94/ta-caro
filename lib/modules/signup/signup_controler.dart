@@ -1,20 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:ta_caro/modules/login/repositories/login_repository.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:ta_caro/modules/signup/repositories/signup_repository.dart';
 import 'package:ta_caro/shared/models/user_model.dart';
 import 'package:ta_caro/shared/utills/app_state.dart';
 
-class LoginController extends ChangeNotifier {
-  final LoginRepository repository;
+class SignupControler extends ChangeNotifier {
+  final SignupRepository repository;
   AppState state = AppState.empty();
   final formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
+  String _name = '';
 
-  LoginController(this.repository);
+  SignupControler(this.repository);
 
-  void onChange({String? email, String? password}) {
+  void onChange({String? email, String? password, String? nome}) {
     _email = email ?? _email;
     _password = password ?? _password;
+    _name = nome ?? _name;
   }
 
   bool validate() {
@@ -31,12 +33,12 @@ class LoginController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> login() async {
+  Future<void> create() async {
     if (validate()) {
       try {
         update(AppState.loading());
-        final response =
-            await repository.login(email: _email, password: _password);
+        final response = await repository.createAccount(
+            email: _email, password: _password, name: _name);
         update(AppState.success<UserModel>(response));
       } catch (e) {
         update(AppState.error(

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:ta_caro/modules/create/create_bottomsheet.dart';
 import 'package:ta_caro/shared/models/user_model.dart';
 import 'package:ta_caro/shared/theme/app_theme.dart';
 import 'package:ta_caro/shared/widgets/bottom_navigator/app_bottom_navigator.dart';
-import 'package:ta_caro/shared/widgets/card_product/card_product.dart';
-import 'package:ta_caro/shared/widgets/list_tile.dart/app_list_tile.dart';
 
 class HomePage extends StatefulWidget {
   final UserModel user;
-  const HomePage({Key? key, required this.user}) : super(key: key);
+  final List<Widget> pages;
+  const HomePage({
+    Key? key,
+    required this.user,
+    required this.pages,
+  }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -15,9 +19,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var currentIndex = 0;
+  late final List<Widget> pages = widget.pages;
 
-  void changedIndex(int index) {
-    currentIndex = index;
+  void changeIndex(int index) async {
+    if (index == 3) {
+      await showModalBottomSheet(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32), topRight: Radius.circular(32))),
+          context: context,
+          builder: (context) => CreateBottomsheet());
+    } else {
+      currentIndex = index;
+    }
     setState(() {});
   }
 
@@ -25,34 +39,25 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.colors.background,
-      body: Stack(
-        children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: 126,
-                child: ListView.builder(
-                  itemBuilder: (context, index) => CardProduct(),
-                  scrollDirection: Axis.horizontal,
-                ),
-              ),
-              AppListTile(),
-              AppListTile(),
-              AppListTile(),
-            ],
-          ),
-          Positioned(
-            left: 26,
-            right: 26,
-            bottom: 14,
-            child: AppBottomNavigator(
-              currentIndex: currentIndex,
-              onChanged: changedIndex,
+      body: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          children: [
+            Container(
+              key: UniqueKey(),
+              child: List.from(pages)[currentIndex],
             ),
-          ),
-        ],
+            Positioned(
+              bottom: 14,
+              left: 26,
+              right: 26,
+              child: AppBottomNavigator(
+                currentIndex: currentIndex,
+                onChanged: changeIndex,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

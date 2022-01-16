@@ -1,9 +1,10 @@
 typedef Empty = Function();
 typedef Loading = Function();
-typedef Error = Function(String message, Exception? e);
 typedef Success<T> = Function(T data);
+typedef Error = Function(String message, Exception? e);
 typedef OrElse = Function();
 
+// ignore: camel_case_types
 abstract class AppState {
   dynamic when({
     Empty? empty,
@@ -15,8 +16,8 @@ abstract class AppState {
 
   static empty() => StateEmpty();
   static loading() => StateLoading();
-  static error(String message, {Exception? e}) => StateError(message, e: e);
   static success<T>(T data) => StateSuccess(data);
+  static error(String message, {Exception? e}) => StateError(message, e: e);
 }
 
 class StateEmpty extends AppState {
@@ -51,6 +52,7 @@ class StateLoading extends AppState {
 
 class StateSuccess<T> extends AppState {
   final T data;
+
   StateSuccess(this.data);
 
   @override
